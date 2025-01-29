@@ -188,7 +188,7 @@ async fn mqtt_loop(stack: &Stack<WifiDevice<'_, WifiStaDevice>>) -> ! {
 
         let mut socket = TcpSocket::new(&stack, &mut rx_buffer, &mut tx_buffer);
 
-        socket.set_timeout(Some(embassy_time::Duration::from_secs(10)));
+        socket.set_timeout(Some(Duration::from_secs(10)));
 
         let address = match stack
             .dns_query("broker.hivemq.com", DnsQueryType::A)
@@ -217,7 +217,7 @@ async fn mqtt_loop(stack: &Stack<WifiDevice<'_, WifiStaDevice>>) -> ! {
             rust_mqtt::client::client_config::MqttVersion::MQTTv5,
             CountingRng(20000),
         );
-        config.add_max_subscribe_qos(rust_mqtt::packet::v5::publish_packet::QualityOfService::QoS1);
+        config.add_max_subscribe_qos(QualityOfService::QoS1);
         config.add_client_id(MQTT_CLIENT_ID);
         config.max_packet_size = 100;
         let mut recv_buffer = [0; 80];
