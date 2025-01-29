@@ -2,12 +2,12 @@
 #![no_main]
 extern crate alloc;
 
-use embassy_mqtt_demo::colors::*;
 use core::fmt::Write;
 use core::ops::Sub;
 use defmt::{error, info, println};
 use defmt_rtt as _;
 use embassy_executor::Spawner;
+use embassy_mqtt_demo::colors::*;
 use embassy_net::dns::DnsQueryType;
 use embassy_net::{tcp::TcpSocket, Ipv4Address, Stack, StackResources};
 use embassy_time::{Duration, Timer};
