@@ -2,7 +2,7 @@
 #![no_main]
 extern crate alloc;
 
-use crate::colors::*;
+use embassy_mqtt_demo::colors::*;
 use core::fmt::Write;
 use core::ops::Sub;
 use defmt::{error, info, println};
@@ -34,8 +34,6 @@ use rust_mqtt::{
 };
 use smart_leds_trait::SmartLedsWrite;
 use time::now;
-
-pub mod colors;
 
 // When you are okay with using a nightly compiler it's better to use https://docs.rs/static_cell/2.1.0/static_cell/macro.make_static.html
 macro_rules! mk_static {
