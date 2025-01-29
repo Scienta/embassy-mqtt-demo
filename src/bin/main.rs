@@ -73,7 +73,7 @@ async fn main(spawner: Spawner) -> ! {
 
     let wifi = peripherals.WIFI;
     let (wifi_interface, controller) =
-        esp_wifi::wifi::new_with_mode(&init, wifi, WifiStaDevice).unwrap();
+        esp_wifi::wifi::new_with_mode(init, wifi, WifiStaDevice).unwrap();
 
     let led_pin = peripherals.GPIO8;
     let freq = 80.MHz();
@@ -101,7 +101,7 @@ async fn main(spawner: Spawner) -> ! {
     );
 
     spawner.spawn(connection(controller)).ok();
-    spawner.spawn(net_task(&stack)).ok();
+    spawner.spawn(net_task(stack)).ok();
     spawner.spawn(led_task(led)).ok();
 
     loop {
@@ -135,7 +135,7 @@ async fn http_loop(stack: &Stack<WifiDevice<'_, WifiStaDevice>>) -> ! {
     loop {
         Timer::after(Duration::from_millis(1_000)).await;
 
-        let mut socket = TcpSocket::new(&stack, &mut rx_buffer, &mut tx_buffer);
+        let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
 
         socket.set_timeout(Some(Duration::from_secs(10)));
 
@@ -186,7 +186,7 @@ async fn mqtt_loop(stack: &Stack<WifiDevice<'_, WifiStaDevice>>) -> ! {
     loop {
         Timer::after(Duration::from_millis(1_000)).await;
 
-        let mut socket = TcpSocket::new(&stack, &mut rx_buffer, &mut tx_buffer);
+        let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
 
         socket.set_timeout(Some(Duration::from_secs(10)));
 
@@ -293,7 +293,7 @@ async fn mqtt_loop(stack: &Stack<WifiDevice<'_, WifiStaDevice>>) -> ! {
         //     Timer::after(Duration::from_millis(3000)).await;
         // }
 
-        count = count + 1;
+        count += 1;
     }
 }
 
@@ -302,13 +302,10 @@ async fn connection(mut controller: WifiController<'static>) {
     info!("start connection task");
     // println!("Device capabilities: {:?}", controller.capabilities());
     loop {
-        match esp_wifi::wifi::wifi_state() {
-            WifiState::StaConnected => {
-                // wait until we're no longer connected
-                controller.wait_for_event(WifiEvent::StaDisconnected).await;
-                Timer::after(Duration::from_millis(5000)).await
-            }
-            _ => {}
+        if matches!(esp_wifi::wifi::wifi_state(), WifiState::StaConnected) {
+            // wait until we're no longer connected
+            controller.wait_for_event(WifiEvent::StaDisconnected).await;
+            Timer::after(Duration::from_millis(5000)).await
         }
         if !matches!(controller.is_started(), Ok(true)) {
             let client_config = Configuration::Client(ClientConfiguration {
